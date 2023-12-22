@@ -1,0 +1,112 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+// Structures section
+struct Race{
+  int numberOfLaps;//número total de voltas na corrida.
+  int currentLap;//volta actual.
+  char* firstPlaceDriverName;//pointer para um endereço de memória que armazenará um char ou um string(é a intenção) com o nome do condutor do carro que vai em primeiro lugar.
+  char* firstPlaceRaceCarColor;//pointer para um endereço de memória que armazenará um char ou um string(é a intenção) com a cor do carro que vai em primeiro lugar.
+};
+
+struct RaceCar{
+  char* driverName;//pointer para um endereço de memória que armazena o nome do condutor
+  char* raceCarColor;//pointer para um endereço de memória que armazena a cor do carro
+  int totalLapTime;//duração total do circuito para o carro
+};
+
+// Print functions section
+void printIntro(){
+  printf("Welcome to the race of the century!!\nThe show is about to start.\nVRUM VRUM VRUM\n\n");//função que faz o print da intro
+}
+
+void printCountDown(){
+  printf("Get Ready...\nSet...\nGO!!!\n\n");//função que faz o print do countdown para a corrida.
+}
+
+void printFirstPlaceAfterLap(struct Race race, struct RaceCar* raceCar1, struct RaceCar* raceCar2){
+  printf("After lap number %d\nFirst place is %s in the %s race car with %ds difference\n",race.currentLap, race.firstPlaceDriverName, race.firstPlaceRaceCarColor, abs(raceCar1 -> totalLapTime - raceCar2 -> totalLapTime));//função que faz o print da actualização do primeiro lugar
+}
+
+void tiedDuring(struct Race race){
+ printf("After lap number %d\nThey're tied!\n",race.currentLap); 
+}
+
+void printCongratulation(struct Race race, struct RaceCar* raceCar1, struct RaceCar* raceCar2 ){
+  printf("Congratulations to %s in the %s car for winning the race of the century with %ds difference", race.firstPlaceDriverName, race.firstPlaceRaceCarColor, abs(raceCar1 -> totalLapTime - raceCar2 -> totalLapTime) );
+}//função que faz o print da congratulação do condutor que terminou a corrida no primeiro lugar
+
+void tiedEnd(struct Race race){
+  printf("\nThe race of the century has ended in a tie");
+}
+
+// Logic functions section
+int calculateTimeToCompleteLap(){
+  int speed= (rand() % 3) + 1;
+  int acceleration= (rand() % 3) + 1;
+  int nerves= (rand() % 3) + 1;
+  int time = 100 - (speed + acceleration + nerves);
+  return time;//função que determina aleatoriamente um factor de 1 a 3 para cada atributo para cada condutor. determina depois o tempo para cada condutor para cada volta, que consiste em 100 menos a soma dos atributos. Retorna esse tempo
+}
+
+void updateRaceCar(struct RaceCar* raceCar){
+   raceCar -> totalLapTime += calculateTimeToCompleteLap();
+}//função que vai somando os tempos de cada volta baseado na função calculateTimeToCompleteLap(), determinando por fim o tempo total
+
+
+
+void updateFirstPlace(struct Race* race, struct RaceCar* raceCar1, struct RaceCar* raceCar2){
+  
+  if (raceCar1 -> totalLapTime < raceCar2 -> totalLapTime){
+    race -> firstPlaceDriverName = raceCar1 -> driverName;
+    race -> firstPlaceRaceCarColor = raceCar1 -> raceCarColor;
+  }
+  else{
+    race -> firstPlaceDriverName = raceCar2 -> driverName;
+    race -> firstPlaceRaceCarColor = raceCar2 -> raceCarColor;
+  }//função que vai definindo quem vai em primeiro lugar ao fim de cada volta. se o tempo do raceCar1 for inferior ao do raceCar2, então atribuímos o pointer da estrutura race firstPlaceDriverName ao pointer da estrutura raceCar1 driverName, ficando estes com o mesmo endereço de memória. Atribuímos também o pointer da estrutura race firstPlaceRaceColor ao pointer da estrutura raceCar1 raceCarColor.  Caso o tempo de raceCar2 seja inferior ao tempo de raceCar1 então atribuímos os mesmos pointers mas na estrutura raceCar2.
+  
+}
+void printTime(struct RaceCar* raceCar1, struct RaceCar* raceCar2){
+  printf("TIME %s : %ds\t TIME %s: %ds\n\n",raceCar1 -> driverName, raceCar1 -> totalLapTime, raceCar2 -> driverName, raceCar2 -> totalLapTime); //faz print dos tempos de raceCar1 e de raceCar2.
+}
+
+void startRace(struct RaceCar* raceCar1, struct RaceCar* raceCar2){
+  struct Race race = {5 , 1 , "" , ""};//declaramos as variáveis membro da estrutura race. 5 número de voltas. 1 volta actual. "" firstPlaceDriverName. ""firstPlaceRaceCarColor.
+  for(int i = 0 ; i < race.numberOfLaps ; i++ ){
+    updateRaceCar(raceCar1);//actualiza o tempo de raceCar1
+    updateRaceCar(raceCar2);//actualiza o tempo de raceCar2
+    updateFirstPlace(&race, raceCar1, raceCar2);//define quem vai à frente em cada volta. &race porque updateFirstPlace() espera um pointer no primeiro parâmetro para que se modifiquem os dados no endereço de memória de race, e race não foi declarado como pointer dentro de startRace(). raceCar1 e raceCar2 porque já foram declarados como pointers em startRace.
+    if (raceCar1 -> totalLapTime != raceCar2 -> totalLapTime){
+    printFirstPlaceAfterLap(race, raceCar1, raceCar2);//faz print de quem vai à frente caso os tempos sejam diferentes
+    }
+    else {
+      tiedDuring(race);//caso os tempos sejam iguais então estão empatados
+    }
+    printTime(raceCar1, raceCar2);
+    race.currentLap++;//aumenta as laps em 1
+
+}
+    if (raceCar1 -> totalLapTime != raceCar2 -> totalLapTime){
+    printCongratulation(race, raceCar1, raceCar2);//faz print da mensagem congratulatória baseado nas alterações que ocorreram no loop acima caso os tempos entre os carros sejam diferentes
+    }
+    else {
+      tiedEnd(race);//caso os tempos sejam iguais, então a corrida terminou num empate
+    }
+}
+
+
+int main() {
+  srand(time(0));//concede uma nova seed a cada segundo para a função rand().
+  struct RaceCar Porto = { "Vasco" , "Blue" , 0};//atribuição de valores às variáveis membro de uma estrutura tipo RaceCar de nome Porto.
+  struct RaceCar Sporting = { "Bruno" , "Green" , 0};//atribuição de valores às variáveis membro de uma estrutura tipo RaceCar de nome Sporting.
+  
+  printIntro();//chamada da função printIntro
+  printCountDown();//chamada da função printCountDown
+  
+  startRace(&Porto, &Sporting);//chamada à função com os parâmetros endereços de memória das estruturas criadas em main.
+
+  
+
+}
